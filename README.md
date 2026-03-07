@@ -2,21 +2,9 @@
 
 Replace Claude Code's thinking spinner with dhikr (remembrance of Allah). Optionally add prayer times to your statusline.
 
-While Claude thinks, instead of "Pondering..." or "Cogitating...", you see:
+![claude-dhikr in action](screenshot.png)
 
-```
-SubhanAllah - Glory be to Allah
-Alhamdulillah - All praise is for Allah
-Rabbi zidni ilma - My Lord, increase me in knowledge
-```
-
-The statusline shows a countdown to the next prayer alongside your project context:
-
-```
-myproject · main · opus · 85% left  「 2:30pm ◇ Asr 4:15pm ── 1h45m 」
-```
-
-The diamond changes color as the prayer approaches. Purple when there's time, gold under 15 minutes, red under 5.
+While Claude thinks, instead of "Pondering..." or "Cogitating...", you see SubhanAllah, Alhamdulillah, Rabbi zidni ilma. The statusline shows a countdown to the next prayer alongside your project context, with the diamond changing color as the prayer approaches.
 
 ## Install
 
