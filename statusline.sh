@@ -18,14 +18,17 @@ RESET='\033[0m'
 
 S="${DIM} · ${RESET}"
 
-# ── Extract data from Claude's JSON ─────────────────────
-cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""' 2>/dev/null)
-model=$(echo "$input" | jq -r '.model.display_name // .model.id // ""' 2>/dev/null)
-cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0' 2>/dev/null)
-added=$(echo "$input" | jq -r '.cost.total_lines_added // 0' 2>/dev/null)
-removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0' 2>/dev/null)
-ctx_size=$(echo "$input" | jq -r '.context_window.context_window_size // 0' 2>/dev/null)
-used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // 0' 2>/dev/null)
+# ── Extract data from Claude's JSON (single jq call) ─────
+IFS=$'\t' read -r cwd model cost added removed ctx_size used_pct <<< \
+    "$(echo "$input" | jq -r '[
+        (.workspace.current_dir // .cwd // ""),
+        (.model.display_name // .model.id // ""),
+        (.cost.total_cost_usd // 0),
+        (.cost.total_lines_added // 0),
+        (.cost.total_lines_removed // 0),
+        (.context_window.context_window_size // 0),
+        (.context_window.used_percentage // 0)
+    ] | @tsv' 2>/dev/null)"
 
 out=""
 
@@ -117,11 +120,8 @@ fi
 if [ -f "$PRAYER_CACHE" ]; then
     now_mins=$(( 10#$(date +%H) * 60 + 10#$(date +%M) ))
 
-    p_fajr=$(jq -r '.Fajr' "$PRAYER_CACHE" 2>/dev/null)
-    p_dhuhr=$(jq -r '.Dhuhr' "$PRAYER_CACHE" 2>/dev/null)
-    p_asr=$(jq -r '.Asr' "$PRAYER_CACHE" 2>/dev/null)
-    p_maghrib=$(jq -r '.Maghrib' "$PRAYER_CACHE" 2>/dev/null)
-    p_isha=$(jq -r '.Isha' "$PRAYER_CACHE" 2>/dev/null)
+    IFS=$'\t' read -r p_fajr p_dhuhr p_asr p_maghrib p_isha <<< \
+        "$(jq -r '[.Fajr, .Dhuhr, .Asr, .Maghrib, .Isha] | @tsv' "$PRAYER_CACHE" 2>/dev/null)"
 
     to_mins() { echo $(( 10#${1%%:*} * 60 + 10#${1##*:} )); }
 

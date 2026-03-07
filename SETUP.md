@@ -4,7 +4,7 @@ You are setting up claude-muslim, a tool that replaces Claude Code's thinking sp
 
 ## Step 1: Ask the user two questions
 
-Use AskUserQuestion (or equivalent) to ask:
+Ask the user:
 
 1. **What city are you in?** (e.g. Toronto, London, Karachi, Dubai)
 2. **Which school do you follow for Asr prayer time?**
@@ -36,8 +36,8 @@ From the city name, determine:
 ## Step 3: Clone and build
 
 ```bash
-git clone https://github.com/moizibnyousaf/claude-muslim ~/projects/claude-muslim
-cd ~/projects/claude-muslim
+git clone https://github.com/moizibnyousaf/claude-muslim claude-muslim
+cd claude-muslim
 npm install && npm run build
 ```
 
@@ -61,7 +61,7 @@ CONF
 Then run the installer:
 
 ```bash
-cd ~/projects/claude-muslim
+cd claude-muslim
 node bin/claude-muslim.js
 ```
 
@@ -71,8 +71,8 @@ Tell the user:
 - Dhikr is now in their spinner (show a few examples from the output)
 - Prayer times are in their statusline
 - They need to restart Claude Code (or start a new session) to see both
-- They can run `node ~/projects/claude-muslim/bin/claude-muslim.js setup` to reconfigure later
-- They can run `node ~/projects/claude-muslim/bin/claude-muslim.js uninstall` to remove everything
+- They can run `node claude-muslim/bin/claude-muslim.js setup` to reconfigure later
+- They can run `node claude-muslim/bin/claude-muslim.js uninstall` to remove everything
 
 ## Requirements
 

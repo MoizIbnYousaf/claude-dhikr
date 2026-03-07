@@ -2,8 +2,22 @@ import { getShuffled } from './dhikr.js';
 import { writeSpinnerVerbs, restoreDefaultVerbs, installStatusline, removeStatusline } from './settings.js';
 import { readConfig, writeConfig, configExists, METHODS, SCHOOLS } from './config.js';
 import { createInterface } from 'node:readline';
+import { execSync } from 'node:child_process';
 
 const args = process.argv.slice(2);
+
+function checkPrereqs(): void {
+  const missing: string[] = [];
+  for (const cmd of ['jq', 'curl']) {
+    try { execSync(`which ${cmd}`, { stdio: 'ignore' }); }
+    catch { missing.push(cmd); }
+  }
+  if (missing.length > 0) {
+    console.log(`  Warning: ${missing.join(' and ')} not found. Prayer times statusline won't work.`);
+    console.log(`  Install with: brew install ${missing.join(' ')}`);
+    console.log('');
+  }
+}
 
 function ask(question: string): Promise<string> {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
@@ -62,6 +76,7 @@ async function install() {
   const verbs = getShuffled();
   await writeSpinnerVerbs(verbs);
 
+  checkPrereqs();
   await installStatusline(config);
 
   console.log('');
