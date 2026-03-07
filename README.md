@@ -20,13 +20,15 @@ The diamond changes color as the prayer approaches. Purple when there's time, go
 
 ## Install
 
-Paste this into Claude Code and let it handle the rest:
+Paste this into Claude Code:
 
 ```
-Clone https://github.com/moizibnyousaf/claude-muslim into ~/projects/, run npm install && npm run build, then run node bin/claude-muslim.js and walk me through the setup.
+Clone https://github.com/moizibnyousaf/claude-muslim into ~/projects/claude-muslim, then read SETUP.md and follow it to set me up.
 ```
 
-Or do it yourself:
+Claude will ask your city and school of fiqh, figure out coordinates and calculation method, then install everything.
+
+Or do it manually:
 
 ```bash
 git clone https://github.com/moizibnyousaf/claude-muslim ~/projects/claude-muslim
