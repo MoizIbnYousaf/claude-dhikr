@@ -130,8 +130,12 @@ async function main() {
   }
 
   if (cmd === '--version' || cmd === '-v' || cmd === 'version') {
-    const pkg = await import('../package.json', { with: { type: 'json' } });
-    console.log(pkg.default.version);
+    const { readFileSync } = await import('node:fs');
+    const { resolve, dirname } = await import('node:path');
+    const { fileURLToPath } = await import('node:url');
+    const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+    const pkg = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf-8'));
+    console.log(pkg.version);
     return;
   }
 

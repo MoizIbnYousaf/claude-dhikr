@@ -26,18 +26,17 @@ Paste this into Claude Code:
 Clone https://github.com/moizibnyousaf/claude-dhikr, then read SETUP.md and follow it to set me up.
 ```
 
-Claude will ask what you want (spinner, statusline, or both), your city, and your school of fiqh. It figures out coordinates and calculation method, then installs everything.
+Claude will ask what you want (spinner, statusline, or both), your city, and your school. It figures out coordinates and calculation method from the city name, then installs everything.
 
-Or do it manually:
+Or install manually:
 
 ```bash
 git clone https://github.com/moizibnyousaf/claude-dhikr
 cd claude-dhikr
-npm install && npm run build
 node bin/claude-dhikr.js
 ```
 
-On first run, you'll be asked for your coordinates and preferred calculation method. Restart Claude Code to see the changes.
+On first run, you'll be asked for your coordinates and calculation method. Restart Claude Code to see the changes.
 
 ## Commands
 
@@ -70,7 +69,7 @@ The first four are the most beloved words to Allah (Sahih Muslim 2137). "La hawl
 
 Claude Code reads `spinnerVerbs` from `~/.claude/settings.json`. This tool writes the dhikr list there. No hooks, no background processes.
 
-The statusline is a bash script installed at `~/.claude/claude-dhikr-statusline.sh`. It fetches prayer times once daily from the [Aladhan API](https://aladhan.com/prayer-times-api) and caches them at `~/.cache/prayer-times/`. It also shows your directory, git branch, model, context usage, and session cost.
+The statusline is a bash script at `~/.claude/claude-dhikr-statusline.sh`. It receives Claude's session JSON on stdin and outputs ANSI text. Prayer times are fetched once daily from the [Aladhan API](https://aladhan.com/prayer-times-api) and cached at `~/.cache/prayer-times/`. The statusline also shows your directory, git branch, model, context usage, and session cost.
 
 ## Configuration
 
@@ -88,13 +87,13 @@ Location and calculation method are stored at `~/.claude-muslim/config.json`:
 
 Run `claude-dhikr setup` to change these.
 
-Supported calculation methods: University of Islamic Sciences Karachi (1), ISNA (2), MWL (3), Umm Al-Qura (4), Egyptian (5), and others from the Aladhan API. Asr calculation: 0 for Shafi'i/Hanbali/Maliki, 1 for Hanafi.
+Calculation methods: Karachi (1), ISNA (2), MWL (3), Umm Al-Qura (4), Egyptian (5), and others from the Aladhan API. School: 0 for Shafi'i/Hanbali/Maliki, 1 for Hanafi.
 
 ## Requirements
 
-- Node.js 18+
+- Node.js 18+ (no `npm install` needed; there are zero runtime dependencies)
 - Claude Code
-- `jq` and `curl` (for the statusline only; the spinner works without them)
+- `jq` and `curl` (statusline only; the spinner works without them)
 
 ## License
 

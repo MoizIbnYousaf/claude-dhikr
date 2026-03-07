@@ -1,10 +1,11 @@
-import { readFile, writeFile, copyFile, chmod } from 'node:fs/promises';
+import { readFile, writeFile, copyFile, chmod, mkdir } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const SETTINGS_PATH = join(homedir(), '.claude', 'settings.json');
-const STATUSLINE_DEST = join(homedir(), '.claude', 'claude-dhikr-statusline.sh');
+const CLAUDE_DIR = join(homedir(), '.claude');
+const SETTINGS_PATH = join(CLAUDE_DIR, 'settings.json');
+const STATUSLINE_DEST = join(CLAUDE_DIR, 'claude-dhikr-statusline.sh');
 
 interface ClaudeSettings {
   [key: string]: unknown;
@@ -22,6 +23,7 @@ async function readSettings(): Promise<ClaudeSettings> {
 }
 
 async function saveSettings(settings: ClaudeSettings): Promise<void> {
+  await mkdir(CLAUDE_DIR, { recursive: true });
   await writeFile(SETTINGS_PATH, JSON.stringify(settings, null, 2) + '\n');
 }
 

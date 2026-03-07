@@ -29,9 +29,10 @@ Dhikr spinner + prayer times statusline for Claude Code.
 
 ## Build and test
 
-- `bun run build` (runs tsc)
+- `bun run build` (runs tsc, outputs to `dist/`)
 - `bun test` (real e2e tests, no mocks, hits Aladhan API)
-- `dist/` is gitignored, must build after cloning
+- `dist/` is committed so end users can clone and run without a build step
+- Zero runtime dependencies; devDependencies are only needed for development
 
 ## Statusline performance
 
