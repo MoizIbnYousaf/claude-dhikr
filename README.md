@@ -20,9 +20,17 @@ The diamond changes color as the prayer approaches. Purple when there's time, go
 
 ## Install
 
+Paste this into Claude Code and let it handle the rest:
+
+```
+Clone https://github.com/moizibnyousaf/claude-muslim into ~/projects/, run npm install && npm run build, then run node bin/claude-muslim.js and walk me through the setup.
+```
+
+Or do it yourself:
+
 ```bash
-git clone https://github.com/moizibnyousaf/claude-muslim
-cd claude-muslim
+git clone https://github.com/moizibnyousaf/claude-muslim ~/projects/claude-muslim
+cd ~/projects/claude-muslim
 npm install && npm run build
 node bin/claude-muslim.js
 ```

@@ -19,15 +19,13 @@ RESET='\033[0m'
 S="${DIM} · ${RESET}"
 
 # ── Extract data from Claude's JSON ─────────────────────
-eval $(echo "$input" | jq -r '
-  @sh "cwd=\(.workspace.current_dir // .cwd // "")",
-  @sh "model=\(.model.display_name // .model.id // "")",
-  @sh "cost=\(.cost.total_cost_usd // 0)",
-  @sh "added=\(.cost.total_lines_added // 0)",
-  @sh "removed=\(.cost.total_lines_removed // 0)",
-  @sh "ctx_size=\(.context_window.context_window_size // 0)",
-  @sh "used_pct=\(.context_window.used_percentage // 0)"
-' 2>/dev/null)
+cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""' 2>/dev/null)
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // ""' 2>/dev/null)
+cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0' 2>/dev/null)
+added=$(echo "$input" | jq -r '.cost.total_lines_added // 0' 2>/dev/null)
+removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0' 2>/dev/null)
+ctx_size=$(echo "$input" | jq -r '.context_window.context_window_size // 0' 2>/dev/null)
+used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // 0' 2>/dev/null)
 
 out=""
 

@@ -62,7 +62,7 @@ async function install() {
   const verbs = getShuffled();
   await writeSpinnerVerbs(verbs);
 
-  const path = await installStatusline(config);
+  await installStatusline(config);
 
   console.log('');
   console.log('  بسم الله');
@@ -84,8 +84,32 @@ async function install() {
   console.log('');
 }
 
+function printHelp() {
+  console.log('');
+  console.log('  claude-muslim');
+  console.log('  Dhikr spinner + prayer times statusline for Claude Code');
+  console.log('');
+  console.log('  Usage:');
+  console.log('    claude-muslim              install dhikr + prayer times');
+  console.log('    claude-muslim setup        reconfigure location and method');
+  console.log('    claude-muslim shuffle      re-shuffle the dhikr order');
+  console.log('    claude-muslim uninstall    remove everything, restore defaults');
+  console.log('');
+}
+
 async function main() {
   const cmd = args[0];
+
+  if (cmd === '--help' || cmd === '-h' || cmd === 'help') {
+    printHelp();
+    return;
+  }
+
+  if (cmd === '--version' || cmd === '-v' || cmd === 'version') {
+    const pkg = await import('../package.json', { with: { type: 'json' } });
+    console.log(pkg.default.version);
+    return;
+  }
 
   if (cmd === 'uninstall' || cmd === '--uninstall') {
     await restoreDefaultVerbs();

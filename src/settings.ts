@@ -39,11 +39,6 @@ export async function restoreDefaultVerbs(): Promise<void> {
   await saveSettings(settings);
 }
 
-export async function hasSpinnerVerbs(): Promise<boolean> {
-  const settings = await readSettings();
-  return !!settings.spinnerVerbs;
-}
-
 // ── Statusline ───────────────────────────────────
 
 function getPackageRoot(): string {
@@ -55,14 +50,14 @@ export async function installStatusline(config: { latitude: number; longitude: n
   await copyFile(src, STATUSLINE_DEST);
   await chmod(STATUSLINE_DEST, 0o755);
 
-  // Patch the config values into the script
   let script = await readFile(STATUSLINE_DEST, 'utf-8');
+  const safeCity = config.city.replace(/["\\\n]/g, '');
   script = script
     .replace(/^PRAYER_LAT=".*"$/m, `PRAYER_LAT="${config.latitude}"`)
     .replace(/^PRAYER_LNG=".*"$/m, `PRAYER_LNG="${config.longitude}"`)
     .replace(/^PRAYER_METHOD=".*"$/m, `PRAYER_METHOD="${config.method}"`)
     .replace(/^PRAYER_SCHOOL=".*"$/m, `PRAYER_SCHOOL="${config.school}"`)
-    .replace(/^PRAYER_CITY=".*"$/m, `PRAYER_CITY="${config.city}"`);
+    .replace(/^PRAYER_CITY=".*"$/m, `PRAYER_CITY="${safeCity}"`);
   await writeFile(STATUSLINE_DEST, script);
 
   const settings = await readSettings();
