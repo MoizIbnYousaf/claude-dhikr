@@ -1,0 +1,81 @@
+import { readFile, writeFile, copyFile, chmod } from 'node:fs/promises';
+import { homedir } from 'node:os';
+import { join, resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const SETTINGS_PATH = join(homedir(), '.claude', 'settings.json');
+const STATUSLINE_DEST = join(homedir(), '.claude', 'claude-muslim-statusline.sh');
+
+interface ClaudeSettings {
+  [key: string]: unknown;
+  spinnerVerbs?: { mode: string; verbs: string[] };
+  statusLine?: { type: string; command: string };
+}
+
+async function readSettings(): Promise<ClaudeSettings> {
+  try {
+    const raw = await readFile(SETTINGS_PATH, 'utf-8');
+    return JSON.parse(raw);
+  } catch {
+    return {};
+  }
+}
+
+async function saveSettings(settings: ClaudeSettings): Promise<void> {
+  await writeFile(SETTINGS_PATH, JSON.stringify(settings, null, 2) + '\n');
+}
+
+// ── Spinner ──────────────────────────────────────
+
+export async function writeSpinnerVerbs(verbs: string[]): Promise<void> {
+  const settings = await readSettings();
+  settings.spinnerVerbs = { mode: 'replace', verbs };
+  await saveSettings(settings);
+}
+
+export async function restoreDefaultVerbs(): Promise<void> {
+  const settings = await readSettings();
+  delete settings.spinnerVerbs;
+  await saveSettings(settings);
+}
+
+export async function hasSpinnerVerbs(): Promise<boolean> {
+  const settings = await readSettings();
+  return !!settings.spinnerVerbs;
+}
+
+// ── Statusline ───────────────────────────────────
+
+function getPackageRoot(): string {
+  return resolve(dirname(fileURLToPath(import.meta.url)), '..');
+}
+
+export async function installStatusline(config: { latitude: number; longitude: number; method: number; school: number; city: string }): Promise<string> {
+  const src = join(getPackageRoot(), 'statusline.sh');
+  await copyFile(src, STATUSLINE_DEST);
+  await chmod(STATUSLINE_DEST, 0o755);
+
+  // Patch the config values into the script
+  let script = await readFile(STATUSLINE_DEST, 'utf-8');
+  script = script
+    .replace(/^PRAYER_LAT=".*"$/m, `PRAYER_LAT="${config.latitude}"`)
+    .replace(/^PRAYER_LNG=".*"$/m, `PRAYER_LNG="${config.longitude}"`)
+    .replace(/^PRAYER_METHOD=".*"$/m, `PRAYER_METHOD="${config.method}"`)
+    .replace(/^PRAYER_SCHOOL=".*"$/m, `PRAYER_SCHOOL="${config.school}"`)
+    .replace(/^PRAYER_CITY=".*"$/m, `PRAYER_CITY="${config.city}"`);
+  await writeFile(STATUSLINE_DEST, script);
+
+  const settings = await readSettings();
+  settings.statusLine = { type: 'command', command: STATUSLINE_DEST };
+  await saveSettings(settings);
+
+  return STATUSLINE_DEST;
+}
+
+export async function removeStatusline(): Promise<void> {
+  const settings = await readSettings();
+  if (settings.statusLine?.command?.includes('claude-muslim')) {
+    delete settings.statusLine;
+    await saveSettings(settings);
+  }
+}
