@@ -1,21 +1,29 @@
-# Setup claude-muslim
+# Setup claude-dhikr
 
-You are setting up claude-muslim, a tool that replaces Claude Code's thinking spinner with dhikr and adds prayer times to the statusline.
+You are setting up claude-dhikr, a tool that replaces Claude Code's thinking spinner with dhikr and optionally adds prayer times to the statusline.
 
-## Step 1: Ask the user two questions
+## Step 1: Ask the user three questions
 
-Ask the user:
+Ask the user all three in a single message. Wait for their response before continuing.
 
-1. **What city are you in?** (e.g. Toronto, London, Karachi, Dubai)
-2. **Which school do you follow for Asr prayer time?**
-   - Hanafi (later Asr time, shadow = 2x object length)
-   - Shafi'i / Hanbali / Maliki (earlier Asr time, shadow = 1x object length)
+1. **What would you like to install?**
+   - Just the dhikr spinner (replaces Claude's thinking text with remembrance of Allah)
+   - Just the prayer times statusline (shows countdown to next prayer)
+   - Both (recommended)
 
-Ask both in a single message. Wait for their response before continuing.
+2. **What city are you in?** (e.g. Toronto, London, Karachi, Dubai)
+   - Only needed if installing the statusline
+
+3. **Which school do you follow for Asr prayer time?**
+   - Hanafi (later Asr time)
+   - Shafi'i / Hanbali / Maliki (earlier Asr time)
+   - Only needed if installing the statusline
+
+If the user only wants the spinner, skip questions 2 and 3.
 
 ## Step 2: Determine configuration
 
-From the city name, determine:
+Only needed if installing the statusline. From the city name, determine:
 
 - **latitude** and **longitude** (you know the coordinates of major cities)
 - **calculation method** based on the region:
@@ -30,21 +38,27 @@ From the city name, determine:
   - Qatar: `10`
   - Singapore / SE Asia: `11` (MUIS)
   - Russia: `14`
+  - India: `1` (Karachi) or `15` (Moonsighting Committee)
+  - Sub-Saharan Africa: `3` (MWL)
   - If unsure, default to `2` (ISNA)
 - **school**: `1` for Hanafi, `0` for Shafi'i/Hanbali/Maliki
 
 ## Step 3: Clone and build
 
 ```bash
-git clone https://github.com/moizibnyousaf/claude-muslim claude-muslim
-cd claude-muslim
+git clone https://github.com/moizibnyousaf/claude-dhikr
+cd claude-dhikr
 npm install && npm run build
 ```
 
-## Step 4: Write config and install
+## Step 4: Install based on user's choice
 
-Write the config file directly so the CLI skips the interactive wizard:
+**Spinner only:**
+```bash
+node bin/claude-dhikr.js spinner
+```
 
+**Statusline only:** Write config first, then install:
 ```bash
 mkdir -p ~/.claude-muslim
 cat > ~/.claude-muslim/config.json << 'CONF'
@@ -56,24 +70,32 @@ cat > ~/.claude-muslim/config.json << 'CONF'
   "city": "<city>"
 }
 CONF
+node bin/claude-dhikr.js statusline
 ```
 
-Then run the installer:
-
+**Both:** Write config first, then install:
 ```bash
-cd claude-muslim
-node bin/claude-muslim.js
+mkdir -p ~/.claude-muslim
+cat > ~/.claude-muslim/config.json << 'CONF'
+{
+  "latitude": <lat>,
+  "longitude": <lng>,
+  "method": <method>,
+  "school": <school>,
+  "city": "<city>"
+}
+CONF
+node bin/claude-dhikr.js
 ```
 
 ## Step 5: Confirm
 
 Tell the user:
-- Dhikr is now in their spinner (show a few examples from the output)
-- Prayer times are in their statusline
-- They need to restart Claude Code (or start a new session) to see both
-- They can run `node claude-muslim/bin/claude-muslim.js setup` to reconfigure later
-- They can run `node claude-muslim/bin/claude-muslim.js uninstall` to remove everything
+- What was installed (show a few dhikr examples if spinner was installed)
+- They need to restart Claude Code (or start a new session) to see the changes
+- They can run `node claude-dhikr/bin/claude-dhikr.js setup` to reconfigure location
+- They can run `node claude-dhikr/bin/claude-dhikr.js uninstall` to remove everything
 
 ## Requirements
 
-The user needs Node.js 18+, `jq`, and `curl` installed. If any are missing, help them install with brew (macOS) or their package manager.
+The user needs Node.js 18+. If installing the statusline, they also need `jq` and `curl`. If any are missing, help them install with brew (macOS) or their package manager.

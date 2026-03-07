@@ -4,7 +4,7 @@ import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SETTINGS_PATH = join(homedir(), '.claude', 'settings.json');
-const STATUSLINE_DEST = join(homedir(), '.claude', 'claude-muslim-statusline.sh');
+const STATUSLINE_DEST = join(homedir(), '.claude', 'claude-dhikr-statusline.sh');
 
 interface ClaudeSettings {
   [key: string]: unknown;
@@ -51,7 +51,7 @@ export async function installStatusline(config: { latitude: number; longitude: n
   await chmod(STATUSLINE_DEST, 0o755);
 
   let script = await readFile(STATUSLINE_DEST, 'utf-8');
-  const safeCity = config.city.replace(/["\\\n]/g, '');
+  const safeCity = config.city.replace(/["\\\n$`]/g, '');
   script = script
     .replace(/^PRAYER_LAT=".*"$/m, `PRAYER_LAT="${config.latitude}"`)
     .replace(/^PRAYER_LNG=".*"$/m, `PRAYER_LNG="${config.longitude}"`)
@@ -69,7 +69,7 @@ export async function installStatusline(config: { latitude: number; longitude: n
 
 export async function removeStatusline(): Promise<void> {
   const settings = await readSettings();
-  if (settings.statusLine?.command?.includes('claude-muslim')) {
+  if (settings.statusLine?.command?.includes('claude-dhikr')) {
     delete settings.statusLine;
     await saveSettings(settings);
   }

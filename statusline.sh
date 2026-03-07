@@ -1,6 +1,6 @@
 #!/bin/bash
 # ─────────────────────────────────────────────────────────
-#  claude-muslim statusline
+#  claude-dhikr statusline
 #  Prayer times + dev context for Claude Code
 # ─────────────────────────────────────────────────────────
 
@@ -19,16 +19,23 @@ RESET='\033[0m'
 S="${DIM} · ${RESET}"
 
 # ── Extract data from Claude's JSON (single jq call) ─────
-IFS=$'\t' read -r cwd model cost added removed ctx_size used_pct <<< \
-    "$(echo "$input" | jq -r '[
-        (.workspace.current_dir // .cwd // ""),
-        (.model.display_name // .model.id // ""),
-        (.cost.total_cost_usd // 0),
-        (.cost.total_lines_added // 0),
-        (.cost.total_lines_removed // 0),
-        (.context_window.context_window_size // 0),
-        (.context_window.used_percentage // 0)
-    ] | @tsv' 2>/dev/null)"
+{
+    read -r cwd
+    read -r model
+    read -r cost
+    read -r added
+    read -r removed
+    read -r ctx_size
+    read -r used_pct
+} <<< "$(echo "$input" | jq -r '
+    (.workspace.current_dir // .cwd // ""),
+    (.model.display_name // .model.id // ""),
+    (.cost.total_cost_usd // 0),
+    (.cost.total_lines_added // 0),
+    (.cost.total_lines_removed // 0),
+    (.context_window.context_window_size // 0),
+    (.context_window.used_percentage // 0)
+' 2>/dev/null)"
 
 out=""
 
@@ -96,7 +103,7 @@ lines=""
 [ -n "$lines" ] && out="${out}${S}${lines}"
 
 # ── 7. Prayer times ────────────────────────────────────
-# These values are patched by `claude-muslim` on install
+# These values are patched by `claude-dhikr` on install
 PRAYER_LAT="21.4225"
 PRAYER_LNG="39.8262"
 PRAYER_METHOD="2"
@@ -120,8 +127,13 @@ fi
 if [ -f "$PRAYER_CACHE" ]; then
     now_mins=$(( 10#$(date +%H) * 60 + 10#$(date +%M) ))
 
-    IFS=$'\t' read -r p_fajr p_dhuhr p_asr p_maghrib p_isha <<< \
-        "$(jq -r '[.Fajr, .Dhuhr, .Asr, .Maghrib, .Isha] | @tsv' "$PRAYER_CACHE" 2>/dev/null)"
+    {
+        read -r p_fajr
+        read -r p_dhuhr
+        read -r p_asr
+        read -r p_maghrib
+        read -r p_isha
+    } <<< "$(jq -r '.Fajr, .Dhuhr, .Asr, .Maghrib, .Isha' "$PRAYER_CACHE" 2>/dev/null)"
 
     to_mins() { echo $(( 10#${1%%:*} * 60 + 10#${1##*:} )); }
 

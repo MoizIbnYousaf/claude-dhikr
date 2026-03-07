@@ -1,14 +1,15 @@
 {
-  "name": "claude-muslim",
+  "name": "claude-dhikr",
   "version": "1.0.0",
   "description": "Dhikr spinner + prayer times statusline for Claude Code",
   "type": "module",
   "bin": {
-    "claude-muslim": "./bin/claude-muslim.js"
+    "claude-dhikr": "./bin/claude-dhikr.js"
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "bun test"
   },
   "files": [
     "dist",
@@ -30,9 +31,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/moizibnyousaf/claude-muslim.git"
+    "url": "git+https://github.com/moizibnyousaf/claude-dhikr.git"
   },
-  "homepage": "https://github.com/moizibnyousaf/claude-muslim",
+  "homepage": "https://github.com/moizibnyousaf/claude-dhikr",
   "author": "Moiz ibn Yousaf",
   "license": "MIT",
   "devDependencies": {

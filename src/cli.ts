@@ -31,7 +31,7 @@ function ask(question: string): Promise<string> {
 
 async function setup() {
   console.log('');
-  console.log('  claude-muslim setup');
+  console.log('  claude-dhikr setup');
   console.log('  ────────────────────────────────────────');
   console.log('');
 
@@ -65,23 +65,30 @@ async function setup() {
   return config;
 }
 
-async function install() {
+async function installSpinner() {
+  const verbs = getShuffled();
+  await writeSpinnerVerbs(verbs);
+  return verbs;
+}
+
+async function installPrayerTimes() {
   let config = await readConfig();
   const hasConfig = await configExists();
-
   if (!hasConfig) {
     config = await setup();
   }
-
-  const verbs = getShuffled();
-  await writeSpinnerVerbs(verbs);
-
   checkPrereqs();
   await installStatusline(config);
+  return config;
+}
+
+async function install() {
+  const verbs = await installSpinner();
+  const config = await installPrayerTimes();
 
   console.log('');
   console.log('  بسم الله');
-  console.log('  claude-muslim');
+  console.log('  claude-dhikr');
   console.log('  ────────────────────────────────────────');
   console.log('');
   console.log('  While Claude thinks, remember Allah.');
@@ -90,26 +97,28 @@ async function install() {
     console.log(`    ✦ ${v}`);
   }
   console.log('');
-  console.log(`  Prayer times → statusline (${config.city})`);
+  console.log(`  Prayer times in statusline (${config.city})`);
   console.log('');
-  console.log('  claude-muslim              install');
-  console.log('  claude-muslim setup        reconfigure location');
-  console.log('  claude-muslim shuffle      re-shuffle dhikr');
-  console.log('  claude-muslim uninstall    restore defaults');
+  printCommands();
+}
+
+function printCommands() {
+  console.log('  claude-dhikr              install everything');
+  console.log('  claude-dhikr spinner      install dhikr spinner only');
+  console.log('  claude-dhikr statusline   install prayer statusline only');
+  console.log('  claude-dhikr setup        reconfigure location');
+  console.log('  claude-dhikr shuffle      re-shuffle dhikr');
+  console.log('  claude-dhikr uninstall    restore defaults');
   console.log('');
 }
 
 function printHelp() {
   console.log('');
-  console.log('  claude-muslim');
+  console.log('  claude-dhikr');
   console.log('  Dhikr spinner + prayer times statusline for Claude Code');
   console.log('');
   console.log('  Usage:');
-  console.log('    claude-muslim              install dhikr + prayer times');
-  console.log('    claude-muslim setup        reconfigure location and method');
-  console.log('    claude-muslim shuffle      re-shuffle the dhikr order');
-  console.log('    claude-muslim uninstall    remove everything, restore defaults');
-  console.log('');
+  printCommands();
 }
 
 async function main() {
@@ -129,7 +138,7 @@ async function main() {
   if (cmd === 'uninstall' || cmd === '--uninstall') {
     await restoreDefaultVerbs();
     await removeStatusline();
-    console.log('  Restored defaults. Run `claude-muslim` to bring it back.');
+    console.log('  Restored defaults. Run `claude-dhikr` to bring it back.');
     return;
   }
 
@@ -144,6 +153,30 @@ async function main() {
     const config = await setup();
     await installStatusline(config);
     console.log('  Statusline updated.');
+    return;
+  }
+
+  if (cmd === 'spinner') {
+    const verbs = await installSpinner();
+    console.log('');
+    console.log('  بسم الله');
+    console.log('  Dhikr spinner installed.');
+    console.log('');
+    for (const v of verbs.slice(0, 5)) {
+      console.log(`    ✦ ${v}`);
+    }
+    console.log('');
+    console.log('  Restart Claude Code to see it.');
+    console.log('');
+    return;
+  }
+
+  if (cmd === 'statusline') {
+    const config = await installPrayerTimes();
+    console.log('');
+    console.log(`  Prayer times statusline installed (${config.city}).`);
+    console.log('  Restart Claude Code to see it.');
+    console.log('');
     return;
   }
 
