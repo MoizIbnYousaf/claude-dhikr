@@ -68,7 +68,8 @@ describe('statusline script', () => {
 
     it('shows context percentage remaining', () => {
       const out = stripAnsi(runStatusline(FULL_JSON));
-      expect(out).toContain('60%');
+      // 40% of 200k = 80k tokens against a 167k usable window (auto-compact aware)
+      expect(out).toContain('53%');
       expect(out).toContain('left');
     });
 
@@ -105,10 +106,11 @@ describe('statusline script', () => {
     it('shows remaining percentage at high usage', () => {
       const json = JSON.stringify({
         workspace: { current_dir: '/tmp/x' },
-        context_window: { context_window_size: 200000, used_percentage: 85 },
+        context_window: { context_window_size: 200000, used_percentage: 70 },
       });
       const out = stripAnsi(runStatusline(json));
-      expect(out).toContain('15%');
+      // 140k tokens of a 167k usable window -> 17% left
+      expect(out).toContain('17%');
     });
   });
 
@@ -178,6 +180,71 @@ describe('statusline script', () => {
     });
   });
 
+  describe('new segments', () => {
+    it('normalizes Fable model name and shows effort suffix', () => {
+      const json = JSON.stringify({
+        workspace: { current_dir: '/tmp/x' },
+        model: { display_name: 'Fable' },
+        effort: { level: 'xhigh' },
+      });
+      const out = stripAnsi(runStatusline(json));
+      expect(out).toContain('fable:xh');
+    });
+
+    it('hides effort suffix at medium (default) effort', () => {
+      const json = JSON.stringify({
+        workspace: { current_dir: '/tmp/x' },
+        model: { display_name: 'Claude Opus 4.6' },
+        effort: { level: 'medium' },
+      });
+      const out = stripAnsi(runStatusline(json));
+      expect(out).toContain('opus');
+      expect(out).not.toContain('opus:');
+    });
+
+    it('shows rate-limit window with pace delta and reset countdown', () => {
+      const resets = Math.floor(Date.now() / 1000) + 9000; // 2.5h left of 5h window
+      const json = JSON.stringify({
+        workspace: { current_dir: '/tmp/x' },
+        rate_limits: { five_hour: { used_percentage: 80, resets_at: resets } },
+      });
+      const out = stripAnsi(runStatusline(json));
+      expect(out).toContain('5h');
+      expect(out).toContain('80%');
+      expect(out).toMatch(/\+\d+/); // 80% used at ~50% elapsed -> positive delta
+      expect(out).toMatch(/⟳2h\d+m/);
+    });
+
+    it('hides rate-limit segment when fields are absent', () => {
+      const json = JSON.stringify({ workspace: { current_dir: '/tmp/x' } });
+      const out = stripAnsi(runStatusline(json));
+      expect(out).not.toContain('5h ');
+      expect(out).not.toContain('⟳');
+    });
+
+    it('shows drift breadcrumb when cwd is below project root', () => {
+      const json = JSON.stringify({
+        workspace: { current_dir: '/tmp/proj/src/lib', project_dir: '/tmp/proj' },
+      });
+      const out = stripAnsi(runStatusline(json));
+      expect(out).toContain('proj');
+      expect(out).toContain('▸ src/lib');
+    });
+
+    it('shows no breadcrumb when cwd equals project root', () => {
+      const json = JSON.stringify({
+        workspace: { current_dir: '/tmp/proj', project_dir: '/tmp/proj' },
+      });
+      const out = stripAnsi(runStatusline(json));
+      expect(out).not.toContain('▸');
+    });
+
+    it('renders two lines when both state and identity segments exist', () => {
+      const out = runStatusline(FULL_JSON);
+      expect(out.trimEnd().split('\n').length).toBe(2);
+    });
+  });
+
   describe('git integration', () => {
     let gitDir: string;
 
@@ -197,7 +264,8 @@ describe('statusline script', () => {
       writeFileSync(join(gitDir, 'tracked.txt'), 'original');
       execSync('git add tracked.txt && git commit -m "add"', { cwd: gitDir, stdio: 'ignore' });
       writeFileSync(join(gitDir, 'tracked.txt'), 'modified');
-      const json = JSON.stringify({ workspace: { current_dir: gitDir } });
+      // fresh session_id -> fresh status cache (renders reuse a ~5s per-session cache)
+      const json = JSON.stringify({ workspace: { current_dir: gitDir }, session_id: 'dirty-test' });
       const out = stripAnsi(runStatusline(json));
       expect(out).toContain('~1');
     });
