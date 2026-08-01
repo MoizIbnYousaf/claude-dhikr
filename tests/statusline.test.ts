@@ -239,6 +239,24 @@ describe('statusline script', () => {
       expect(out).not.toContain('▸');
     });
 
+    it('survives current_usage arriving as an object without desyncing the parse', () => {
+      const json = JSON.stringify({
+        workspace: { current_dir: '/tmp/x' },
+        model: { display_name: 'Claude Opus 4.6' },
+        cost: { total_cost_usd: 1.5 },
+        context_window: {
+          context_window_size: 200000,
+          current_usage: { input_tokens: 60000, cache_read_tokens: 20000, total_tokens: 80000 },
+          used_percentage: 40,
+        },
+      });
+      const out = stripAnsi(runStatusline(json));
+      expect(out).toContain('opus');       // parse not shifted
+      expect(out).toContain('$1.50');      // cost still lands in its field
+      expect(out).toContain('53%');        // 80k of 167k usable
+      expect(out).toContain('left');
+    });
+
     it('renders two lines when both state and identity segments exist', () => {
       const out = runStatusline(FULL_JSON);
       expect(out.trimEnd().split('\n').length).toBe(2);

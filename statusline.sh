@@ -48,9 +48,13 @@ S="${DIM} · ${RESET}"
     (.cost.total_cost_usd // 0),
     (.cost.total_lines_added // 0),
     (.cost.total_lines_removed // 0),
-    (.context_window.context_window_size // 0),
-    (.context_window.current_usage // 0),
-    (.context_window.used_percentage // 0),
+    (.context_window.context_window_size // 0 | if type == "number" then . else 0 end),
+    (.context_window.current_usage // 0
+        | if type == "number" then .
+          elif type == "object" then (.total_tokens? // .input_tokens? // 0)
+          else 0 end
+        | if type == "number" then . else 0 end),
+    (.context_window.used_percentage // 0 | if type == "number" then . else 0 end),
     (.effort.level // ""),
     (.thinking.enabled // false),
     (.fast_mode // false),
@@ -86,6 +90,8 @@ fi
 
 # ── 2. Context battery (auto-compact aware) ────────────
 # 100% used = about to auto-compact (~33k tokens of headroom), not the raw window
+ctx_size=${ctx_size%%.*}
+ctx_used=${ctx_used%%.*}
 if [ "$ctx_size" -gt 0 ] 2>/dev/null; then
     usable=$((ctx_size - 33000))
     [ "$usable" -le 0 ] && usable=$ctx_size
