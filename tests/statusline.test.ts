@@ -244,9 +244,15 @@ describe('statusline script', () => {
         workspace: { current_dir: '/tmp/x' },
         model: { display_name: 'Claude Opus 4.6' },
         cost: { total_cost_usd: 1.5 },
+        // real payload shape: four token fields, no total_tokens — usage is their sum
         context_window: {
           context_window_size: 200000,
-          current_usage: { input_tokens: 60000, cache_read_tokens: 20000, total_tokens: 80000 },
+          current_usage: {
+            input_tokens: 2,
+            output_tokens: 1398,
+            cache_creation_input_tokens: 600,
+            cache_read_input_tokens: 78000,
+          },
           used_percentage: 40,
         },
       });

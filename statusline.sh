@@ -51,7 +51,10 @@ S="${DIM} · ${RESET}"
     (.context_window.context_window_size // 0 | if type == "number" then . else 0 end),
     (.context_window.current_usage // 0
         | if type == "number" then .
-          elif type == "object" then (.total_tokens? // .input_tokens? // 0)
+          elif type == "object" then
+            (.total_tokens? //
+             ((.input_tokens? // 0) + (.output_tokens? // 0) +
+              (.cache_creation_input_tokens? // 0) + (.cache_read_input_tokens? // 0)))
           else 0 end
         | if type == "number" then . else 0 end),
     (.context_window.used_percentage // 0 | if type == "number" then . else 0 end),
@@ -288,7 +291,7 @@ if [ -f "$PRAYER_CACHE" ]; then
         cd_clr="${RED}"
     fi
 
-    prayer_seg="  ${DIM}「${RESET} ${MUTED}${clock}${RESET} ${diamond} ${BLUE}${next_name}${RESET} ${DIM}${next_time}${RESET}${dashes}${cd_clr}${countdown}${RESET} ${DIM}」${RESET}"
+    prayer_seg="  ${DIM}「${RESET} ${MUTED}${clock}${RESET} ${diamond} ${BLUE}${next_name}${RESET} ${DIM}${next_time}${RESET}${dashes}${cd_clr}${countdown}${RESET} ${DIM}left 」${RESET}"
     line2="${line2}${prayer_seg}"
 fi
 
